@@ -53,7 +53,15 @@ async function requestDoH () {
 }
 </script>
 
+<!-- <style>
+table, th, td {
+    border:1px solid black;
+    min-width: 60%;
+}
+</style> -->
+
 <p>This site is built with Svelte as a playground project, which sends request to a DoH server. <a href="https://github.com/richardevs/dns-spa" target="_blank">Source</a></p>
+<p>It quries the common record types for the domain. Format: TTL, value</p>
 <h1>
     <input bind:value={domain} placeholder="enter desired domain" /> <button id="sum" on:click={requestDoH}>Summarize</button>
 </h1>
@@ -71,8 +79,13 @@ async function requestDoH () {
     {#each [...apiMap] as [key, value]}
         <!-- <li>{key} => {Object.getOwnPropertyNames(value)}</li> -->
         <h1>{key}</h1>
+        <!-- <table>
+        <tr>
+            <th>TTL</th>
+            <th>Value</th>
+        </tr> -->
         {#each value as item}
-            <li>{item.TTL}, {item.data}</li>
+        <li>{item.TTL}, {item.data}</li>
         {/each}
     {/each}
 {/key}
