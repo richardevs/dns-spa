@@ -1,12 +1,12 @@
 <script lang="ts">
-// import { onMount } from 'svelte';
+import Keydown from "svelte-keydown";
 let domain = '';
 let count = 0;
 export const apiMap = new Map();
 // import { writable, derived } from 'svelte/store';
 // export const apiData = writable({});
 let baseurl = "https://cloudflare-dns.com/dns-query?"
-let dnstype = ["A", "AAAA", "TXT", "MX"]
+let dnstype = ["SOA", "A", "AAAA", "TXT", "MX", "NS"]
 const emailcheck: { [x: string]: string; } = {
     '_dmarc': "TXT",
     '_spf': "TXT",
@@ -54,7 +54,15 @@ async function requestDoH () {
 </script>
 
 <p>This site is built with Svelte as a playground project, which sends request to a DoH server.</p>
-<input bind:value={domain} placeholder="enter desired domain" /> <button on:click={requestDoH}>Summarize</button>
+<h1>
+    <input bind:value={domain} placeholder="enter desired domain" /> <button id="sum" on:click={requestDoH}>Summarize</button>
+</h1>
+
+<Keydown
+  on:Enter={() => {
+    document.getElementById("sum")?.click();
+  }}
+/>
 
 <!-- https://svelte.dev/repl/db8ac032184b455bbeed903ba042937c?version=4.2.17 -->
 {#key count}
