@@ -5,13 +5,18 @@ let count = 0;
 export const apiMap = new Map();
 // import { writable, derived } from 'svelte/store';
 // export const apiData = writable({});
-let baseurl = "https://cloudflare-dns.com/dns-query?"
-let dnstype = ["SOA", "A", "AAAA", "TXT", "MX", "NS"]
+
+// let baseurl = "https://cloudflare-dns.com/dns-query?"
+let baseurl = "https://dns.google/resolve?"
+
+let dnstype = ["SOA", "A", "AAAA", "TXT", "MX", "NS", "CAA"]
 const emailcheck: { [x: string]: string; } = {
     '_dmarc': "TXT",
     '_spf': "TXT",
+    'mta-sts': "A",
     '_mta-sts': "TXT",
-    '_smtp._tls': "TXT"
+    '_smtp._tls': "TXT",
+    'google._domainkey': "TXT"
 };
 
 // https://svelte.dev/repl/cb31be94ea444b41a11d1320d16ba6dc?version=3.32.3
@@ -59,6 +64,12 @@ table, th, td {
     min-width: 60%;
 }
 </style> -->
+
+<style>
+    li {
+        word-wrap: break-word;
+    }
+</style>
 
 <p>This site is built with Svelte as a playground project, which sends request to a DoH server. <a href="https://github.com/richardevs/dns-spa" target="_blank">Source</a></p>
 <p>It quries the common record types for the domain. Format: TTL, value</p>
