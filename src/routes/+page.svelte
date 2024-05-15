@@ -5,12 +5,20 @@ let count = 0;
 export const apiMap = new Map();
 // import { writable, derived } from 'svelte/store';
 // export const apiData = writable({});
-let dnstype = ["A", "AAAA", "TXT"]
+let baseurl = "https://cloudflare-dns.com/dns-query?"
+let dnstype = ["A", "AAAA", "TXT", "MX"]
+const emailcheck: { [x: string]: string; } = {
+    '_dmarc': "TXT",
+    '_spf': "TXT",
+    '_mta-sts': "TXT",
+    '_smtp._tls': "TXT"
+};
 
 // https://svelte.dev/repl/cb31be94ea444b41a11d1320d16ba6dc?version=3.32.3
 async function requestDoH () {
     apiMap.clear()
-    let baseurl = "https://cloudflare-dns.com/dns-query?"
+
+    // dnstype check
     for (const type of dnstype) {
         await fetch(baseurl + "name=" + domain + "&type=" + type, {headers: {"accept": "application/dns-json"}})
         .then(response => response.json())
@@ -24,8 +32,24 @@ async function requestDoH () {
             return [];
         });
     }
+
+    // special email records check on subdomains
+    for (let key in emailcheck) {
+        await fetch(baseurl + "name=" + key + "." + domain + "&type=" + emailcheck[key], {headers: {"accept": "application/dns-json"}})
+        .then(response => response.json())
+        .then(data => {
+            if( data.Answer ) {
+                apiMap.set(key, data.Answer)
+                console.log("setting", key)
+            }
+        }).catch(error => {
+            console.log(error);
+            return [];
+        });
+    }
+
     count++;
-    console.log("returning??");
+    console.log("returning.");
 }
 </script>
 
