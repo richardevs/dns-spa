@@ -53,7 +53,7 @@ async function requestDoH () {
 }
 </script>
 
-<p>This site is built with Svelte as a playground project, which sends request to a DoH server.</p>
+<p>This site is built with Svelte as a playground project, which sends request to a DoH server. <a href="https://github.com/richardevs/dns-spa" target="_blank">Source</a></p>
 <h1>
     <input bind:value={domain} placeholder="enter desired domain" /> <button id="sum" on:click={requestDoH}>Summarize</button>
 </h1>
