@@ -3,8 +3,12 @@ import Keydown from "svelte-keydown";
 let domain = '';
 let count = 0;
 export const apiMap = new Map();
-// import { writable, derived } from 'svelte/store';
-// export const apiData = writable({});
+
+import { page } from '$app/stores'
+const getquery = $page.url.searchParams.get('query')
+if ( getquery ) {
+    domain = getquery;
+}
 
 // let baseurl = "https://cloudflare-dns.com/dns-query?"
 let baseurl = "https://dns.google/resolve?"
@@ -90,11 +94,6 @@ table, th, td {
     {#each [...apiMap] as [key, value]}
         <!-- <li>{key} => {Object.getOwnPropertyNames(value)}</li> -->
         <h1>{key}</h1>
-        <!-- <table>
-        <tr>
-            <th>TTL</th>
-            <th>Value</th>
-        </tr> -->
         {#each value as item}
         <li>{item.TTL}, {item.data}</li>
         {/each}
