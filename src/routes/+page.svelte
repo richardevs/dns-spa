@@ -4,11 +4,15 @@ let domain = '';
 let count = 0;
 export const apiMap = new Map();
 
+import { onMount } from 'svelte';
 import { page } from '$app/stores'
-const getquery = $page.url.searchParams.get('query')
-if ( getquery ) {
-    domain = getquery;
-}
+
+onMount(() => {
+    const getquery = $page.url.searchParams.get('query')
+    if ( getquery ) {
+        domain = getquery;
+    }
+})
 
 // let baseurl = "https://cloudflare-dns.com/dns-query?"
 let baseurl = "https://dns.google/resolve?"
