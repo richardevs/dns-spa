@@ -1,20 +1,31 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Keydown from 'svelte-keydown';
+	import { page } from '$app/stores';
 	let domain = '';
 	let count = 0;
 	export const apiMap = new Map();
 
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
 
 	function encodeResults(results: object): string {
-		return encodeURIComponent(JSON.stringify(results));
+		const jsonStr = JSON.stringify(results);
+		// Make base64 URL-safe
+		return btoa(jsonStr)
+			.replace(/\+/g, '-')
+			.replace(/\//g, '_')
+			.replace(/=+$/, '');
 	}
 
 	function decodeResults(encoded: string): object {
 		try {
-			return JSON.parse(decodeURIComponent(encoded));
+			// Restore base64 padding and characters
+			const base64 = encoded
+				.replace(/-/g, '+')
+				.replace(/_/g, '/')
+				.padEnd(encoded.length + ((4 - (encoded.length % 4)) % 4), '=');
+			const jsonStr = atob(base64);
+			return JSON.parse(jsonStr);
 		} catch (e) {
 			console.error('Failed to decode results:', e);
 			return {};
@@ -22,20 +33,19 @@
 	}
 
 	function loadResultsFromURL() {
-		const url = new URL(window.location);
-		const getquery = url.searchParams.get('query');
-		const results = url.searchParams.get('results');
+		const getquery = $page.url.searchParams.get('query');
+		const results = $page.url.searchParams.get('results');
 		
 		if (getquery) {
 			domain = getquery;
 			if (results) {
 				try {
-					const parsed = JSON.parse(decodeURIComponent(results));
+					const parsed = decodeResults(results);
 					apiMap.clear();
 					for (const [key, value] of Object.entries(parsed)) {
 						apiMap.set(key, value);
 					}
-					count++;
+					count++; // Trigger UI refresh
 				} catch (e) {
 					console.error('Failed to parse results:', e);
 				}
@@ -46,11 +56,13 @@
 	// Load initial state from URL
 	onMount(() => {
 		loadResultsFromURL();
-		
-		window.onpopstate = () => {
-			loadResultsFromURL();
-		};
 	});
+
+	$: {
+		// React to URL changes
+		$page.url.search;
+		loadResultsFromURL();
+	}
 
 	// let baseurl = "https://cloudflare-dns.com/dns-query?"
 	let baseurl = 'https://dns.google/resolve?';
