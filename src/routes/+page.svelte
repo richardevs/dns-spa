@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Keydown from 'svelte-keydown';
 	let domain = '';
 	let count = 0;
@@ -7,13 +8,48 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 
-	onMount(() => {
-		const getquery = $page.url.searchParams.get('query');
+	function encodeResults(results: object): string {
+		return encodeURIComponent(JSON.stringify(results));
+	}
+
+	function decodeResults(encoded: string): object {
+		try {
+			return JSON.parse(decodeURIComponent(encoded));
+		} catch (e) {
+			console.error('Failed to decode results:', e);
+			return {};
+		}
+	}
+
+	function loadResultsFromURL() {
+		const url = new URL(window.location);
+		const getquery = url.searchParams.get('query');
+		const results = url.searchParams.get('results');
+		
 		if (getquery) {
 			domain = getquery;
-			// Not to automatically trigger the request as of now
-			// document.getElementById("sum")?.click();
+			if (results) {
+				try {
+					const parsed = JSON.parse(decodeURIComponent(results));
+					apiMap.clear();
+					for (const [key, value] of Object.entries(parsed)) {
+						apiMap.set(key, value);
+					}
+					count++;
+				} catch (e) {
+					console.error('Failed to parse results:', e);
+				}
+			}
 		}
+	}
+
+	// Load initial state from URL
+	onMount(() => {
+		loadResultsFromURL();
+		
+		window.onpopstate = () => {
+			loadResultsFromURL();
+		};
 	});
 
 	// let baseurl = "https://cloudflare-dns.com/dns-query?"
@@ -29,10 +65,19 @@
 		'google._domainkey': 'TXT'
 	};
 
+	async function updateURL(results?: object) {
+		const url = new URL(window.location);
+		url.searchParams.set('query', domain);
+		if (results) {
+			url.searchParams.set('results', encodeResults(results));
+		}
+		await goto(url.toString(), { replaceState: false });
+	}
+
 	// https://svelte.dev/repl/cb31be94ea444b41a11d1320d16ba6dc?version=3.32.3
 	async function requestDoH() {
-		updateURL();
 		apiMap.clear();
+		const results: Record<string, any> = {};
 
 		// dnstype check
 		for (const type of dnstype) {
@@ -43,6 +88,7 @@
 				.then((data) => {
 					if (data.Answer) {
 						apiMap.set(type, data.Answer);
+						results[type] = data.Answer;
 						console.log('setting', type);
 					}
 				})
@@ -61,6 +107,7 @@
 				.then((data) => {
 					if (data.Answer) {
 						apiMap.set(key, data.Answer);
+						results[key] = data.Answer;
 						console.log('setting', key);
 					}
 				})
@@ -71,13 +118,7 @@
 		}
 
 		count++;
-		console.log('returning.');
-	}
-
-	function updateURL() {
-		const url = new URL(window.location);
-		url.searchParams.set('query', domain);
-		window.history.pushState({}, '', url);
+		await updateURL(results);
 	}
 </script>
 
