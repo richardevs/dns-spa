@@ -11,6 +11,8 @@ onMount(() => {
     const getquery = $page.url.searchParams.get('query')
     if ( getquery ) {
         domain = getquery;
+        // Not to automatically trigger the request as of now
+        // document.getElementById("sum")?.click();
     }
 })
 
@@ -29,6 +31,7 @@ const emailcheck: { [x: string]: string; } = {
 
 // https://svelte.dev/repl/cb31be94ea444b41a11d1320d16ba6dc?version=3.32.3
 async function requestDoH () {
+    updateURL();
     apiMap.clear()
 
     // dnstype check
@@ -64,6 +67,13 @@ async function requestDoH () {
     count++;
     console.log("returning.");
 }
+
+function updateURL() {
+    const url = new URL(window.location);
+    url.searchParams.set('query', domain);
+    window.history.pushState({}, '', url);
+}
+
 </script>
 
 <!-- <style>
