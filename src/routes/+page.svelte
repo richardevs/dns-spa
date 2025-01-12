@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import Keydown from 'svelte-keydown';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
+
 	let domain = '';
 	let count = 0;
 	export const apiMap = new Map();
@@ -11,10 +13,7 @@
 	function encodeResults(results: object): string {
 		const jsonStr = JSON.stringify(results);
 		// Make base64 URL-safe
-		return btoa(jsonStr)
-			.replace(/\+/g, '-')
-			.replace(/\//g, '_')
-			.replace(/=+$/, '');
+		return btoa(jsonStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 	}
 
 	function decodeResults(encoded: string): object {
@@ -33,34 +32,49 @@
 	}
 
 	function loadResultsFromURL() {
-		const getquery = $page.url.searchParams.get('query');
-		const results = $page.url.searchParams.get('results');
-		
-		if (getquery) {
-			domain = getquery;
-			if (results) {
-				try {
-					const parsed = decodeResults(results);
-					apiMap.clear();
-					for (const [key, value] of Object.entries(parsed)) {
-						apiMap.set(key, value);
+		if (browser) {
+			const getquery = $page.url.searchParams.get('query');
+			const results = $page.url.searchParams.get('results');
+
+			if (getquery) {
+				domain = getquery;
+				if (results) {
+					try {
+						const parsed = decodeResults(results);
+						apiMap.clear();
+						for (const [key, value] of Object.entries(parsed)) {
+							apiMap.set(key, value);
+						}
+						count++; // Trigger UI refresh
+					} catch (e) {
+						console.error('Failed to parse results:', e);
 					}
-					count++; // Trigger UI refresh
-				} catch (e) {
-					console.error('Failed to parse results:', e);
 				}
 			}
 		}
 	}
+	let updateURL: (results?: object) => Promise<void>;
 
 	// Load initial state from URL
 	onMount(() => {
+		// Load initial results
 		loadResultsFromURL();
+
+		updateURL = async (results?: object) => {
+			const url = new URL(window.location);
+			url.searchParams.set('query', domain);
+			if (results) {
+				url.searchParams.set('results', encodeResults(results));
+			}
+			await goto(url.toString(), { replaceState: false });
+		};
 	});
 
 	$: {
 		// React to URL changes
-		$page.url.search;
+		if (browser) {
+			$page.url.search;
+		}
 		loadResultsFromURL();
 	}
 
@@ -76,15 +90,6 @@
 		'_smtp._tls': 'TXT',
 		'google._domainkey': 'TXT'
 	};
-
-	async function updateURL(results?: object) {
-		const url = new URL(window.location);
-		url.searchParams.set('query', domain);
-		if (results) {
-			url.searchParams.set('results', encodeResults(results));
-		}
-		await goto(url.toString(), { replaceState: false });
-	}
 
 	// https://svelte.dev/repl/cb31be94ea444b41a11d1320d16ba6dc?version=3.32.3
 	async function requestDoH() {
