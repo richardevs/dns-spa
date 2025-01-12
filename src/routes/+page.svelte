@@ -160,8 +160,7 @@
 		margin-bottom: 2rem;
 	}
 
-	input,
-	select {
+	input {
 		width: 98%; /* Reduce width to accommodate padding */
 		padding: 0.75rem;
 		border: 2px solid #e2e8f0;
@@ -173,8 +172,7 @@
 		box-sizing: border-box; /* Include padding in width calculation */
 	}
 
-	input:focus,
-	select:focus {
+	input:focus {
 		outline: none;
 		border-color: #4299e1;
 	}
