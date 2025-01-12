@@ -81,13 +81,55 @@
 	}
 </script>
 
+<div class="container">
+	<!-- <h1>DNS Query Tool</h1> -->
+	<div class="card">
+		<p>
+			This site is built with Svelte as a playground project, which sends request to a DoH server. <a
+				href="https://github.com/richardevs/dns-spa"
+				target="_blank">Source</a
+			>
+		</p>
+		<p>It queries the common record types for the domain. Format: TTL, value</p>
+		<h1>
+			<input bind:value={domain} placeholder="enter desired domain" />
+			<button id="sum" on:click={requestDoH}>Summarize</button>
+		</h1>
+
+		<Keydown
+			on:Enter={() => {
+				document.getElementById('sum')?.click();
+			}}
+		/>
+
+		<!-- https://svelte.dev/repl/db8ac032184b455bbeed903ba042937c?version=4.2.17 -->
+		{#key count}
+			<!-- <li>Debug: {count}</li> -->
+			<!-- https://github.com/sveltejs/svelte/issues/5021 -->
+			{#each [...apiMap] as [key, value]}
+				<!-- <li>{key} => {Object.getOwnPropertyNames(value)}</li> -->
+				<h1>{key}</h1>
+				{#each value as item}
+					<li>{item.TTL}, {item.data}</li>
+				{/each}
+			{/each}
+		{/key}
+	</div>
+</div>
+
 <style>
 	:global(body) {
 		margin: 0;
 		padding: 0;
 		width: 100%;
 		min-height: 100vh;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		font-family:
+			system-ui,
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			Roboto,
+			sans-serif;
 		background: #f5f5f5;
 		color: #333;
 		line-height: 1.6;
@@ -120,15 +162,15 @@
 
 	input,
 	select {
-		width: 98%;  /* Reduce width to accommodate padding */
+		width: 98%; /* Reduce width to accommodate padding */
 		padding: 0.75rem;
 		border: 2px solid #e2e8f0;
 		border-radius: 8px;
 		margin-bottom: 1rem;
-		margin-right: 2rem;  /* Add right margin */
+		margin-right: 2rem; /* Add right margin */
 		font-size: 1rem;
 		transition: border-color 0.2s ease;
-		box-sizing: border-box;  /* Include padding in width calculation */
+		box-sizing: border-box; /* Include padding in width calculation */
 	}
 
 	input:focus,
@@ -170,39 +212,3 @@
 		word-wrap: break-word;
 	}
 </style>
-
-<div class="container">
-	<!-- <h1>DNS Query Tool</h1> -->
-	<div class="card">
-		<p>
-			This site is built with Svelte as a playground project, which sends request to a DoH server. <a
-				href="https://github.com/richardevs/dns-spa"
-				target="_blank">Source</a
-			>
-		</p>
-		<p>It queries the common record types for the domain. Format: TTL, value</p>
-		<h1>
-			<input bind:value={domain} placeholder="enter desired domain" />
-			<button id="sum" on:click={requestDoH}>Summarize</button>
-		</h1>
-
-		<Keydown
-			on:Enter={() => {
-				document.getElementById('sum')?.click();
-			}}
-		/>
-
-		<!-- https://svelte.dev/repl/db8ac032184b455bbeed903ba042937c?version=4.2.17 -->
-		{#key count}
-			<!-- <li>Debug: {count}</li> -->
-			<!-- https://github.com/sveltejs/svelte/issues/5021 -->
-			{#each [...apiMap] as [key, value]}
-				<!-- <li>{key} => {Object.getOwnPropertyNames(value)}</li> -->
-				<h1>{key}</h1>
-				{#each value as item}
-					<li>{item.TTL}, {item.data}</li>
-				{/each}
-			{/each}
-		{/key}
-	</div>
-</div>
