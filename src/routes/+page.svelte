@@ -141,6 +141,18 @@
 		count++;
 		await updateURL(results);
 	}
+
+	async function copyLink() {
+		const url = new URL(window.location.href);
+		const queryOnly = url.searchParams.get('query');
+
+		// Build URL string based on query existence
+		const urlString = queryOnly
+			? `${window.location.origin}${window.location.pathname}?query=${queryOnly}`
+			: `${window.location.origin}${window.location.pathname}`;
+
+		await navigator.clipboard.writeText(urlString);
+	}
 </script>
 
 <div class="container">
@@ -156,6 +168,7 @@
 		<h1>
 			<input bind:value={domain} placeholder="enter desired domain" />
 			<button id="sum" on:click={requestDoH}>Summarize</button>
+			<button id="sum" on:click={copyLink}>Copy Link</button>
 		</h1>
 
 		<Keydown
