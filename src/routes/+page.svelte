@@ -168,7 +168,7 @@
 		<h1>
 			<input bind:value={domain} placeholder="enter desired domain" />
 			<button id="sum" on:click={requestDoH}>Summarize</button>
-			<button id="sum" on:click={copyLink}>Copy Link</button>
+			<button id="copylink" on:click={copyLink}>Copy Link</button>
 		</h1>
 
 		<Keydown
