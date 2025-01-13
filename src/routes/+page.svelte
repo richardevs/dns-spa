@@ -65,7 +65,7 @@
 		loadResultsFromURL();
 
 		updateURL = async (results?: object) => {
-			const url = new URL(window.location);
+			const url = new URL(window.location.href);
 			url.searchParams.set('query', domain);
 			if (results) {
 				url.searchParams.set('results', encodeResults(results));
