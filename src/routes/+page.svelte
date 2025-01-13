@@ -9,6 +9,7 @@
 	let domain = '';
 	let count = 0;
 	export const apiMap = new Map();
+	let showToast = false;
 
 	function encodeResults(results: object): string {
 		const compressed = compress(results);
@@ -143,17 +144,27 @@
 	}
 
 	async function copyLink() {
-		const url = new URL(window.location.href);
-		const queryOnly = url.searchParams.get('query');
+		try {
+			const url = new URL(window.location.href);
+			const queryOnly = url.searchParams.get('query');
 
-		// Build URL string based on query existence
-		const urlString = queryOnly
-			? `${window.location.origin}${window.location.pathname}?query=${queryOnly}`
-			: `${window.location.origin}${window.location.pathname}`;
+			// Build URL string based on query existence
+			const urlString = queryOnly
+				? `${window.location.origin}${window.location.pathname}?query=${queryOnly}`
+				: `${window.location.origin}${window.location.pathname}`;
 
-		await navigator.clipboard.writeText(urlString);
+			await navigator.clipboard.writeText(urlString);
+			showToast = true;
+			setTimeout(() => (showToast = false), 2000);
+		} catch (e) {
+			console.error('Failed to copy:', e);
+		}
 	}
 </script>
+
+{#if showToast}
+	<div class="toast">Link copied!</div>
+{/if}
 
 <div class="container">
 	<!-- <h1>DNS Query Tool</h1> -->
@@ -283,5 +294,29 @@
 
 	li {
 		word-wrap: break-word;
+	}
+
+	.toast {
+		position: fixed;
+		bottom: 20px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #4a5568;
+		color: white;
+		padding: 0.75rem 1.5rem;
+		border-radius: 4px;
+		z-index: 50;
+		animation: fadeInOut 2s ease;
+	}
+
+	@keyframes fadeInOut {
+		0%,
+		100% {
+			opacity: 0;
+		}
+		10%,
+		90% {
+			opacity: 1;
+		}
 	}
 </style>
