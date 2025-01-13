@@ -3,17 +3,20 @@
 	import Keydown from 'svelte-keydown';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+	import { compress, decompress } from 'compress-json';
 
 	let domain = '';
 	let count = 0;
 	export const apiMap = new Map();
 
-	import { onMount } from 'svelte';
-
 	function encodeResults(results: object): string {
-		const jsonStr = JSON.stringify(results);
+		const compressed = compress(results);
 		// Make base64 URL-safe
-		return btoa(jsonStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+		return btoa(JSON.stringify(compressed))
+			.replace(/\+/g, '-')
+			.replace(/\//g, '_')
+			.replace(/=+$/, '');
 	}
 
 	function decodeResults(encoded: string): object {
@@ -23,8 +26,9 @@
 				.replace(/-/g, '+')
 				.replace(/_/g, '/')
 				.padEnd(encoded.length + ((4 - (encoded.length % 4)) % 4), '=');
-			const jsonStr = atob(base64);
-			return JSON.parse(jsonStr);
+			const compressedStr = atob(base64);
+			const compressed = JSON.parse(compressedStr);
+			return decompress(compressed);
 		} catch (e) {
 			console.error('Failed to decode results:', e);
 			return {};
